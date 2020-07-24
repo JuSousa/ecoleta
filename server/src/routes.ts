@@ -1,21 +1,24 @@
 import express from "express";
+import { celebrate, Joi } from "celebrate";
 import multer from "multer";
 import multerConfig from "./config/multer";
-import { celebrate, Joi } from "celebrate";
-
 import PointsController from "./controllers/PointsController";
 import ItemsController from "./controllers/ItemsController";
 
-const routes = express.Router();
+const routes = express();
 const upload = multer(multerConfig);
 
 const pointsController = new PointsController();
 const itemsController = new ItemsController();
 
+/** Items */
 routes.get("/items", itemsController.index);
-routes.get("/points/:id", pointsController.show);
-routes.get("/points", pointsController.index);
 
+/** Points */
+routes.get("/points", pointsController.index);
+routes.get("/points/:id", pointsController.show);
+
+/** Create Point */
 routes.post(
   "/points",
   upload.single("image"),
@@ -24,7 +27,7 @@ routes.post(
       body: Joi.object().keys({
         name: Joi.string().required(),
         email: Joi.string().required().email(),
-        whatsapp: Joi.string().required(),
+        whatsapp: Joi.number().required(),
         latitude: Joi.number().required(),
         longitude: Joi.number().required(),
         city: Joi.string().required(),
@@ -32,15 +35,9 @@ routes.post(
         items: Joi.string().required(),
       }),
     },
-    {
-      abortEarly: false,
-    }
+    { abortEarly: false }
   ),
   pointsController.create
 );
-
-// index, show, create, update, delete
-// Service Pattern
-// Repository Patterny (data Mapper)
 
 export default routes;
